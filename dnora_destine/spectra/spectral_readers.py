@@ -16,14 +16,14 @@ from functools import partial
 
 from dnora_destine.polytope_functions import (
     download_ecmwf_wave_from_destine,
-    destine_wave_ds_read,
+    ds_wave_polytope_read,
 )
 
 
 class ECMWF(SpectralProductReader):
     product_configuration = ProductConfiguration(
         ds_creator_function=partial(
-            destine_wave_ds_read, freq0=0.04118, nfreq=32, finc=1.1, ndirs=36
+            ds_wave_polytope_read, freq0=0.04118, nfreq=32, finc=1.1, ndirs=36
         ),
         convention=SpectralConvention.MET,
         default_data_source=DataSource.REMOTE,

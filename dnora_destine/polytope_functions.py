@@ -6,6 +6,30 @@ from dnora import msg
 from scipy.interpolate import griddata
 
 from dnora.spectra import Spectra
+from dnora.wind import Wind
+from dnora.ice import Ice
+from dnora.type_manager.dnora_types import DnoraDataType
+
+import os
+
+import glob
+
+
+# This is defined here because the dnora-version doesn't have the ability to keep old files
+def setup_temp_dir(
+    data_type: DnoraDataType, reader_name: str, clean_old_files: bool = True
+) -> str:
+    """Sets up a temporery directory for fimex files and cleans out possible old files"""
+    temp_folder = f"dnora_{data_type.name.lower()}_temp"
+    if not os.path.isdir(temp_folder):
+        os.mkdir(temp_folder)
+        print("Creating folder %s..." % temp_folder)
+    if clean_old_files:
+        msg.plain("Removing old files from temporary folder...")
+        for f in glob.glob(f"dnora_{data_type.name.lower()}_temp/{reader_name}*.*"):
+            os.remove(f)
+
+    return temp_folder
 
 
 def download_ecmwf_from_destine(start_time, end_time, lon, lat, folder: str) -> str:
@@ -54,7 +78,6 @@ def ds_polytope_read(
     url: str,
     lon: np.ndarray,
     lat: np.ndarray,
-    dnora_class,
     **kwargs,
 ):
 
@@ -86,7 +109,7 @@ def ds_polytope_read(
             list(zip(lons, lats)), v10[n, :], (Xi, Yi), method="nearest"
         )
 
-    data = dnora_class(lon=xi, lat=yi, time=ds.time + ds.step)
+    data = Wind(lon=xi, lat=yi, time=ds.time + ds.step)
     data.set_u(u10i)
     data.set_v(v10i)
     lo, la = utils.grid.expand_area(
@@ -97,7 +120,9 @@ def ds_polytope_read(
     return data.sel(time=slice(start_time, end_time)).ds()
 
 
-def download_ecmwf_wave_from_destine(start_time, filename: str, end_time=None) -> None:
+def download_ecmwf_wave_from_destine(
+    start_time, filename: str, url: str, end_time=None
+) -> None:
     """Downloads wave data from DestinE. If no end_time is given, a minimal query is done to get the coordinates of the points"""
 
     start_time = pd.Timestamp(start_time)
@@ -121,7 +146,7 @@ def download_ecmwf_wave_from_destine(start_time, filename: str, end_time=None) -
             "The polytope package is required to acces these data! Install by e.g. 'python -m pip install polytope-client' and 'conda install cfgrib eccodes=2.41.0'"
         )
         raise e
-    c = Client(address="polytope.lumi.apps.dte.destination-earth.eu")
+    c = Client(address=url)
 
     request_waves = {
         "class": "d1",
@@ -160,7 +185,7 @@ def ds_wave_polytope_read(
 
     temp_file = f"{name}_temp.grib"
     grib_file = f"{folder}/{temp_file}"
-    download_ecmwf_wave_from_destine(start_time, grib_file, end_time)
+    download_ecmwf_wave_from_destine(start_time, grib_file, url, end_time)
 
     ds = xr.open_dataset(grib_file, engine="cfgrib", decode_timedelta=True)
     ds = ds.isel(values=inds)
@@ -233,7 +258,6 @@ def ds_ice_polytope_read(
     url: str,
     lon: np.ndarray,
     lat: np.ndarray,
-    dnora_class,
     **kwargs,
 ):
 
@@ -265,7 +289,7 @@ def ds_ice_polytope_read(
         #    list(zip(lons, lats)), sit[n, :], (Xi, Yi), method="nearest"
         # )
 
-    data = dnora_class(lon=xi, lat=yi, time=ds.time + ds.step)
+    data = Ice(lon=xi, lat=yi, time=ds.time + ds.step)
     data.set_sic(sici)
     # data.set_sit(siti)
     lo, la = utils.grid.expand_area(

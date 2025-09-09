@@ -3,7 +3,7 @@ requires = ["setuptools>=42", "wheel", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-version = "v0.1.0"
+version = "v0.1.2"
 name = "dnora-destine"
 description = "Add-on to dnora: Access to DestinE weather products"
 authors = [ { name = "Konstantinos Christakos", email = "konstantinosc@met.no"}, { name = "Jan-Victor Björkqvist", email = "janvb@met.no" } ]

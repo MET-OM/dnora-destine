@@ -6,7 +6,7 @@ Add-on to dnora: Access to DestinE weather products
 ```shell
 $ conda create -n dnora_destine python=3.9
 $ conda activate dnora_destine
-$ python -m pip install dnora_destine 
+$ python -m pip install dnora-destine 
 ```
 
 # Minimal example

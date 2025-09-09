@@ -27,9 +27,8 @@ grid.import_topo()
 grid.mesh_grid()
 grid.set_boundary_points(dn.grid.mask.Edges(edges=["N", "W", "S", "E"]))
 
-model = dnd.modelrun.ECMWF(
-    grid, start_time="2025-08-26T00:00", end_time="2025-08-26T23:00"
-)
+# Data is not saved, so update dates to be close to todays date
+model = dnd.modelrun.ECMWF(grid, year=2025, month=8, day=26)
 model.import_spectra()
 model.import_wind()
 model.import_ice()

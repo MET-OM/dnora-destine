@@ -1,0 +1,11 @@
+name: dnora-destine
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.9,<3.11
+  - pytest
+  - eccodes=2.41.0
+  - cfgrib
+  - pip:
+    - dnora
+    - polytope-client

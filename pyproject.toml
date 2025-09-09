@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=42", "wheel", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+version = "v0.1.0"
+name = "dnora-destine"
+description = "Add-on to dnora: Access to DestinE weather products"
+authors = [ { name = "Konstantinos Christakos", email = "konstantinosc@met.no"}, { name = "Jan-Victor Björkqvist", email = "janvb@met.no" } ]
+urls = {homepage = "https://github.com/MET-OM/dnora-destine", download = "https://github.com/MET-OM/dnora-destine"}
+requires-python = ">=3.9, <3.11"
+dependencies = [
+    "dnora>=2.0.4",
+    "polytope-client",
+    "cfgrib",
+    "eccodes==2.41.0"
+]
+readme = "README.md"
+license = {file = "LICENSE"}
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+
+
+[tool.setuptools]
+license-files = ["LICENSE"]
+
+[tool.setuptools_scm]
+write_to = "dnora_destine/_version.py"

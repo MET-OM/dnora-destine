@@ -15,4 +15,4 @@ class ECMWF(ProductReader):
         default_data_source=DataSource.REMOTE,
     )
 
-    file_structure = FileStructure(stride=24, hours_per_file=24)
+    file_structure = FileStructure(stride=24, hours_per_file=97)

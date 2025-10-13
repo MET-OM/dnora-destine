@@ -35,7 +35,7 @@ class ECMWF(SpectralProductReader):
 
     file_structure = FileStructure(
         stride=24,
-        hours_per_file=24,
+        hours_per_file=97,
     )
 
     def post_processing(self):

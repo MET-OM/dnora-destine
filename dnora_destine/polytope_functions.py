@@ -15,6 +15,26 @@ import os
 import glob
 
 
+def get_destine_steps(start_time: str, end_time: str) -> tuple[str, list[int]]:
+    """DestinE data in daily runs, so first step (0) is 00:00
+
+    Function calculates which steps are needed to cover exactly start_time and end_time
+
+    returns the start date and list of steps
+    """
+    start_time = pd.to_datetime(start_time)
+    end_time = pd.to_datetime(end_time)
+
+    date_str = start_time.strftime("%Y%m%d")
+    start_of_day = pd.to_datetime(f"{date_str} 00:00:00")
+
+    first_step = int(pd.to_timedelta(start_time - start_of_day).total_seconds() / 3600)
+    last_step = int(pd.to_timedelta(end_time - start_of_day).total_seconds() / 3600) + 1
+    all_steps = range(first_step, last_step)
+
+    return date_str, list(all_steps)
+
+
 # This is defined here because the dnora-version doesn't have the ability to keep old files
 def setup_temp_dir(
     data_type: DnoraDataType, reader_name: str, clean_old_files: bool = True
@@ -46,6 +66,9 @@ def download_ecmwf_from_destine(start_time, end_time, lon, lat, folder: str) -> 
         raise e
     c = Client(address="polytope.lumi.apps.dte.destination-earth.eu")
 
+    date_str, steps = get_destine_steps(start_time, end_time)
+    steps = "/".join([f"{h:.0f}" for h in steps])
+
     filename = f"{folder}/ECMWF_temp.grib"  # Switch to this in production. Then the files will be cleaned out
     # filename = f"{folder}/destine_temp.grib"
     request_winds = {
@@ -57,7 +80,7 @@ def download_ecmwf_from_destine(start_time, end_time, lon, lat, folder: str) -> 
         "levtype": "sfc",
         "param": "165/166",
         "time": "00",
-        "step": "0/1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16/17/18/19/20/21/22/23",
+        "step": steps,  # "0/1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16/17/18/19/20/21/22/23",
         "area": [
             int(np.ceil(lat[1])),
             int(np.floor(lon[0])),
@@ -65,7 +88,6 @@ def download_ecmwf_from_destine(start_time, end_time, lon, lat, folder: str) -> 
             int(np.ceil(lon[1])),
         ],
     }
-    date_str = start_time.strftime("%Y%m%d")
     request_winds["date"] = date_str
 
     c.retrieve("destination-earth", request_winds, filename)
@@ -129,15 +151,13 @@ def download_ecmwf_wave_from_destine(
 
     if end_time is None:
         params = "140221"
-        steps = "0"
         end_time = start_time
     else:
         params = "140229/140230/140231"
-        # Because the reader is set up to do daily chunks, the start and end time will always be in the same day
-        days = [str(l) for l in range(start_time.hour, end_time.hour + 1)]
-        steps = "/".join(days)
-        # steps = "0/1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16/17/18/19/20/21/22/23"
-    end_time = pd.Timestamp(end_time)
+    #    end_time = pd.Timestamp(end_time)
+
+    date_str, steps = get_destine_steps(start_time, end_time)
+    steps = "/".join([f"{h:.0f}" for h in steps])
 
     try:
         from polytope.api import Client
@@ -161,9 +181,7 @@ def download_ecmwf_wave_from_destine(
         "time": "00",
         "step": steps,
     }
-    date_str = start_time.strftime("%Y%m%d")
     request_waves["date"] = date_str
-
     c.retrieve("destination-earth", request_waves, filename)
 
 
@@ -228,6 +246,8 @@ def download_ecmwf_ice_from_destine(start_time, end_time, lon, lat, folder: str)
 
     filename = f"{folder}/ECMWF_temp_ice.grib"  # Switch to this in production. Then the files will be cleaned out
     # filename = f"{folder}/destine_temp.grib"
+    date_str, steps = get_destine_steps(start_time, end_time)
+    steps = "/".join([f"{h:.0f}" for h in steps])
     request_ice = {
         "class": "d1",
         "expver": "0001",
@@ -237,7 +257,7 @@ def download_ecmwf_ice_from_destine(start_time, end_time, lon, lat, folder: str)
         "levtype": "sfc",
         "param": "31",
         "time": "00",
-        "step": "0/1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16/17/18/19/20/21/22/23",
+        "step": steps,
         "area": [
             int(np.ceil(lat[1])),
             int(np.floor(lon[0])),
@@ -245,7 +265,6 @@ def download_ecmwf_ice_from_destine(start_time, end_time, lon, lat, folder: str)
             int(np.ceil(lon[1])),
         ],
     }
-    date_str = start_time.strftime("%Y%m%d")
     request_ice["date"] = date_str
 
     c.retrieve("destination-earth", request_ice, filename)

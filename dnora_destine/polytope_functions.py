@@ -9,7 +9,7 @@ from dnora.spectra import Spectra
 from dnora.wind import Wind
 from dnora.ice import Ice
 from dnora.type_manager.dnora_types import DnoraDataType
-
+from dnora.read.ds_read_functions import setup_temp_dir
 import os
 
 import glob
@@ -33,23 +33,6 @@ def get_destine_steps(start_time: str, end_time: str) -> tuple[str, list[int]]:
     all_steps = range(first_step, last_step)
 
     return date_str, list(all_steps)
-
-
-# This is defined here because the dnora-version doesn't have the ability to keep old files
-def setup_temp_dir(
-    data_type: DnoraDataType, reader_name: str, clean_old_files: bool = True
-) -> str:
-    """Sets up a temporery directory for fimex files and cleans out possible old files"""
-    temp_folder = f"dnora_{data_type.name.lower()}_temp"
-    if not os.path.isdir(temp_folder):
-        os.mkdir(temp_folder)
-        print("Creating folder %s..." % temp_folder)
-    if clean_old_files:
-        msg.plain("Removing old files from temporary folder...")
-        for f in glob.glob(f"dnora_{data_type.name.lower()}_temp/{reader_name}*.*"):
-            os.remove(f)
-
-    return temp_folder
 
 
 def download_ecmwf_from_destine(start_time, end_time, lon, lat, folder: str) -> str:

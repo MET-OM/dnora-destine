@@ -119,7 +119,10 @@ def ds_polytope_read(
     yi = np.arange(min(lats), max(lats), native_dlat)
     Xi, Yi = np.meshgrid(xi, yi)
 
-    Nt = len(ds.step)
+    try:
+        Nt = len(ds.step)
+    except TypeError:
+        Nt = 1
     u10i = np.zeros((Nt, len(yi), len(xi)))
     v10i = np.zeros((Nt, len(yi), len(xi)))
     # If this becomes slow, we need to think about 3D interpolation / resuing weights
@@ -131,7 +134,7 @@ def ds_polytope_read(
             list(zip(lons, lats)), v10[n, :], (Xi, Yi), method="nearest"
         )
 
-    data = Wind(lon=xi, lat=yi, time=ds.time + ds.step)
+    data = Wind(lon=xi, lat=yi, time=(ds.time + ds.step).values)
     data.set_u(u10i)
     data.set_v(v10i)
     lo, la = utils.grid.expand_area(
@@ -288,15 +291,17 @@ def ds_ice_polytope_read(
     lons, lats, sic = (
         ds.siconc.longitude.values,
         ds.siconc.latitude.values,
-        ds.siconc.values,
+        np.atleast_2d(ds.siconc.values),
         # ds.sit.values,
     )
     native_dlon, native_dlat = 1 / 8, 1 / 30
     xi = np.arange(min(lons), max(lons), native_dlon)
     yi = np.arange(min(lats), max(lats), native_dlat)
     Xi, Yi = np.meshgrid(xi, yi)
-
-    Nt = len(ds.step)
+    try:
+        Nt = len(ds.step)
+    except TypeError:
+        Nt = 1
     sici = np.zeros((Nt, len(yi), len(xi)))
     # siti = np.zeros((Nt, len(yi), len(xi)))
     # If this becomes slow, we need to think about 3D interpolation / resuing weights
@@ -308,7 +313,7 @@ def ds_ice_polytope_read(
         #    list(zip(lons, lats)), sit[n, :], (Xi, Yi), method="nearest"
         # )
 
-    data = Ice(lon=xi, lat=yi, time=ds.time + ds.step)
+    data = Ice(lon=xi, lat=yi, time=(ds.time + ds.step).values)
     data.set_sic(sici)
     # data.set_sit(siti)
     lo, la = utils.grid.expand_area(

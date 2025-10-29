@@ -8,6 +8,8 @@ from scipy.interpolate import griddata
 from dnora.spectra import Spectra
 from dnora.wind import Wind
 from dnora.ice import Ice
+from dnora.waveseries import WaveSeries
+import geo_parameters as gp
 from dnora.type_manager.dnora_types import DnoraDataType
 from dnora.read.ds_read_functions import setup_temp_dir
 import os
@@ -169,6 +171,36 @@ def download_ecmwf_wave_from_destine(
     }
     request_waves["date"] = date_str
     c.retrieve("destination-earth", request_waves, filename)
+
+
+def ds_waveseries_polytope_read(
+    start_time: pd.Timestamp,
+    end_time: pd.Timestamp,
+    url: str,
+    ## Partial variables from ProductReader
+    inds: list[int],
+):
+    name = "ECMWF"
+    folder = setup_temp_dir(DnoraDataType.WAVESERIES, name)
+
+    temp_file = f"{name}_temp.grib"
+    grib_file = f"{folder}/{temp_file}"
+    download_ecmwf_wave_from_destine(start_time, grib_file, url, end_time)
+
+    ds = xr.open_dataset(grib_file, engine="cfgrib", decode_timedelta=True)
+    ds = ds.isel(values=inds)
+    ii = np.where(
+        np.logical_and(
+            ds.valid_time.values >= start_time, ds.valid_time.values <= end_time
+        )
+    )[0]
+    ds = ds.isel(step=ii)
+    data = WaveSeries.from_ds(
+        ds,
+        ds_aliases={"wmd": gp.wave.Dirm, "pp1d": gp.wave.Dirp},
+        time=ds.valid_time.values,
+    )
+    return data.ds()
 
 
 def ds_wave_polytope_read(

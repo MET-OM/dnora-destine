@@ -131,7 +131,11 @@ def ds_polytope_read(
 
 
 def download_ecmwf_wave_from_destine(
-    start_time, filename: str, url: str, end_time=None
+    start_time,
+    filename: str,
+    url: str,
+    end_time=None,
+    params=None,
 ) -> None:
     """Downloads wave data from DestinE. If no end_time is given, a minimal query is done to get the coordinates of the points"""
 
@@ -140,9 +144,6 @@ def download_ecmwf_wave_from_destine(
     if end_time is None:
         params = "140221"
         end_time = start_time
-    else:
-        params = "140229/140230/140231"
-    #    end_time = pd.Timestamp(end_time)
 
     date_str, steps = get_destine_steps(start_time, end_time)
     steps = "/".join([f"{h:.0f}" for h in steps])
@@ -185,7 +186,9 @@ def ds_waveseries_polytope_read(
 
     temp_file = f"{name}_temp.grib"
     grib_file = f"{folder}/{temp_file}"
-    download_ecmwf_wave_from_destine(start_time, grib_file, url, end_time)
+    download_ecmwf_wave_from_destine(
+        start_time, grib_file, url, end_time, params="140229/140230/140231/140232"
+    )
 
     ds = xr.open_dataset(grib_file, engine="cfgrib", decode_timedelta=True)
     ds = ds.isel(values=inds)
@@ -197,7 +200,7 @@ def ds_waveseries_polytope_read(
     ds = ds.isel(step=ii)
     data = WaveSeries.from_ds(
         ds,
-        ds_aliases={"wmd": gp.wave.Dirm, "pp1d": gp.wave.Dirp},
+        ds_aliases={"mwd": gp.wave.Dirm, "pp1d": gp.wave.Tp, "mwp": gp.wave.Tm01},
         time=ds.valid_time.values,
     )
     return data.ds()
@@ -221,7 +224,9 @@ def ds_wave_polytope_read(
 
     temp_file = f"{name}_temp.grib"
     grib_file = f"{folder}/{temp_file}"
-    download_ecmwf_wave_from_destine(start_time, grib_file, url, end_time)
+    download_ecmwf_wave_from_destine(
+        start_time, grib_file, url, end_time, params="140229/140230/140231"
+    )
 
     ds = xr.open_dataset(grib_file, engine="cfgrib", decode_timedelta=True)
     ds = ds.isel(values=inds)

@@ -8,9 +8,9 @@ name = "dnora-destine"
 description = "Add-on to dnora: Access to DestinE weather products"
 authors = [ { name = "Konstantinos Christakos", email = "konstantinosc@met.no"}, { name = "Jan-Victor Björkqvist", email = "janvb@met.no" } ]
 urls = {homepage = "https://github.com/MET-OM/dnora-destine", download = "https://github.com/MET-OM/dnora-destine"}
-requires-python = ">=3.9, <=3.13"
+requires-python = ">=3.9"
 dependencies = [
-    "dnora>=2.2.1",
+    "dnora>=2.3.2",
     "polytope-client",
     "cfgrib",
     "eccodes==2.41.0"

@@ -2,7 +2,7 @@ from dnora.type_manager.data_sources import DataSource
 from dnora.type_manager.dnora_types import DnoraDataType
 import xarray as xr
 from dnora import msg
-from dnora_destine.polytope_functions import setup_temp_dir
+from dnora.read.ds_read_functions import setup_temp_dir
 from dnora.cacher.caching_strategies import CachingStrategy
 from dnora.type_manager.spectral_conventions import SpectralConvention
 from dnora.read.product_readers import SpectralProductReader
@@ -14,16 +14,14 @@ import glob
 from functools import partial
 
 
-from dnora_destine.polytope_functions import (
-    download_ecmwf_wave_from_destine,
-    ds_wave_polytope_read,
-)
+from dnora_destine.polytope_functions import download_ecmwf_from_destine
+from .ds_creators import ds_polytope_spectra_read
 
 
 class ECMWF(SpectralProductReader):
     product_configuration = ProductConfiguration(
         ds_creator_function=partial(
-            ds_wave_polytope_read, freq0=0.04118, nfreq=32, finc=1.1, ndirs=36
+            ds_polytope_spectra_read, freq0=0.04118, nfreq=32, finc=1.1, ndirs=36
         ),
         convention=SpectralConvention.MET,
         default_data_source=DataSource.REMOTE,
@@ -56,10 +54,11 @@ class ECMWF(SpectralProductReader):
         if glob.glob(grib_file):
             msg.from_file(grib_file)
         else:
-            download_ecmwf_wave_from_destine(
-                start_time,
-                grib_file,
-                self.product_configuration.default_folders.get(DataSource.REMOTE),
+            download_ecmwf_from_destine(
+                start_time=start_time,
+                url=self.product_configuration.default_folders.get(DataSource.REMOTE),
+                out_file=grib_file,
+                params="140229",
             )
         ds = xr.open_dataset(grib_file, engine="cfgrib", decode_timedelta=True)
         return {"lat": ds.latitude.values, "lon": ds.longitude.values}

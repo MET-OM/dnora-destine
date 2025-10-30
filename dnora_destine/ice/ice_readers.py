@@ -3,7 +3,7 @@ from dnora.type_manager.data_sources import DataSource
 from dnora.read.product_readers import ProductReader
 from dnora.read.product_configuration import ProductConfiguration
 from dnora.read.file_structure import FileStructure
-from ds_creators import ds_polytope_ice_read
+from .ds_creators import ds_polytope_ice_read
 
 
 class ECMWF(ProductReader):

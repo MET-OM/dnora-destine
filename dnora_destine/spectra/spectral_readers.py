@@ -2,7 +2,7 @@ from dnora.type_manager.data_sources import DataSource
 from dnora.type_manager.dnora_types import DnoraDataType
 import xarray as xr
 from dnora import msg
-from dnora_destine.polytope_functions import setup_temp_dir
+from dnora.read.ds_read_functions import setup_temp_dir
 from dnora.cacher.caching_strategies import CachingStrategy
 from dnora.type_manager.spectral_conventions import SpectralConvention
 from dnora.read.product_readers import SpectralProductReader

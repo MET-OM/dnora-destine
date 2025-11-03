@@ -34,6 +34,7 @@ def download_ecmwf_from_destine(
     end_time: str = None,
     lon: tuple[float] = None,
     lat: tuple[float] = None,
+    levelist: int = None,
 ) -> None:
     """Downloads 10 m wind data DestinE ClimateDT data portfolio data from the Destine Earth Store System  for a
     given area and time period"""
@@ -74,6 +75,11 @@ def download_ecmwf_from_destine(
         ]
     else:
         request_data["stream"] = "wave"
+
+    if levelist:
+        levelist = str(levelist)
+        request_data["levtype"] = "pl"
+        request_data["levelist"] = levelist
 
     c = Client(address=url)
 

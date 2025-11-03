@@ -49,5 +49,5 @@ def ds_polytope_ice_read(
     new_grid = Ice(lon=lon, lat=lat, time=orig_ice.time())
     new_grid.set_spacing(dlon=1 / 8, dlat=1 / 30)
     ice = orig_ice.resample.grid(new_grid)
-
+    ice.meta.append({"source": url})
     return ice.sel(time=slice(start_time, end_time)).ds()

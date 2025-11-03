@@ -51,5 +51,6 @@ def ds_polytope_ocean_read(
     new_grid = Ocean(lon=lon, lat=lat, time=orig_ocean.time())
     new_grid.set_spacing(dlon=1 / 8, dlat=1 / 30)
     ocean = orig_ocean.resample.grid(new_grid)
+    ocean.meta.append({"source": url})
 
     return ocean.sel(time=slice(start_time, end_time)).ds()

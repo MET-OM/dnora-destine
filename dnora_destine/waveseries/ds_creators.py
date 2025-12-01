@@ -42,4 +42,5 @@ def ds_polytope_waveseries_read(
         ds_aliases={"mwd": gp.wave.Dirm, "pp1d": gp.wave.Tp, "mwp": gp.wave.Tm01},
         time=ds.valid_time.values,
     )
+    data.meta.append({"source": url})
     return data.ds()

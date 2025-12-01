@@ -57,5 +57,5 @@ def ds_polytope_spectra_read(
     Ed = utils.spec.expand_to_directional_spectrum(E, freq, dirs, dirp=ds.mwd.values)
     obj = Spectra.from_ds(ds, freq=freq, dirs=dirs, time=ds.valid_time.values)
     obj.set_spec(Ed)
-
+    obj.meta.append({"source": url})
     return obj.ds()

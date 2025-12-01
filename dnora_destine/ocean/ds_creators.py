@@ -2,7 +2,7 @@ from dnora_destine.polytope_functions import download_ecmwf_from_destine
 
 import xarray as xr
 import numpy as np
-from dnora.ice import Ice
+from dnora.ocean import Ocean
 import pandas as pd
 from geo_skeletons import PointSkeleton
 import geo_parameters as gp
@@ -11,7 +11,7 @@ from dnora.read.ds_read_functions import setup_temp_dir
 from dnora.type_manager.dnora_types import DnoraDataType
 
 
-def ds_polytope_ice_read(
+def ds_polytope_ocean_read(
     start_time: pd.Timestamp,
     end_time: pd.Timestamp,
     url: str,
@@ -21,7 +21,7 @@ def ds_polytope_ice_read(
 ):
 
     name = "ECMWF"
-    folder = setup_temp_dir(DnoraDataType.ICE, name)
+    folder = setup_temp_dir(DnoraDataType.OCEAN, name)
 
     temp_file = f"{name}_temp.grib"
     grib_file = f"{folder}/{temp_file}"
@@ -30,7 +30,7 @@ def ds_polytope_ice_read(
         start_time=start_time,
         url=url,
         out_file=grib_file,
-        params="31",
+        params="34",
         end_time=end_time,
         lon=lon,
         lat=lat,
@@ -39,15 +39,18 @@ def ds_polytope_ice_read(
     ds = xr.open_dataset(grib_file, engine="cfgrib", decode_timedelta=True)
 
     # Represent original data that was downloaded
-    orig_ice = PointSkeleton.add_time().add_datavar(gp.ocean.IceFraction("sic"))(
-        lon=ds.siconc.longitude.values,
-        lat=ds.siconc.latitude.values,
+    orig_ocean = PointSkeleton.add_time().add_datavar(
+        gp.ocean.SeaSurfaceTemperature("sst")
+    )(
+        lon=ds.longitude.values,
+        lat=ds.latitude.values,
         time=(ds.time + ds.step).values,
     )
-    orig_ice.set_sic(ds.siconc.values)
+    orig_ocean.set_sst(ds.sst.values)
     # Represent new gridded data
-    new_grid = Ice(lon=lon, lat=lat, time=orig_ice.time())
+    new_grid = Ocean(lon=lon, lat=lat, time=orig_ocean.time())
     new_grid.set_spacing(dlon=1 / 8, dlat=1 / 30)
-    ice = orig_ice.resample.grid(new_grid)
-    ice.meta.append({"source": url})
-    return ice.sel(time=slice(start_time, end_time)).ds()
+    ocean = orig_ocean.resample.grid(new_grid)
+    ocean.meta.append({"source": url})
+
+    return ocean.sel(time=slice(start_time, end_time)).ds()

@@ -50,5 +50,5 @@ def ds_polytope_wind_read(
     new_grid = Wind(lon=lon, lat=lat, time=orig_wind.time())
     new_grid.set_spacing(dlon=1 / 8, dlat=1 / 30)
     wind = orig_wind.resample.grid(new_grid)
-
+    wind.meta.append({"source": url})
     return wind.sel(time=slice(start_time, end_time)).ds()
